@@ -1,4 +1,3 @@
-import cupy as cp
 import numpy as np
 import warnings
 import time
@@ -8,12 +7,12 @@ from matplotlib import pyplot as plt
 from sparse_recon.sparse_hessian_recon.sparse_hessian_recon import sparse_hessian
 from sparse_recon.iterative_deconv.iterative_deconv import iterative_deconv
 from sparse_recon.iterative_deconv.kernel import Gauss
-from utils.background_estimation import background_estimation
-from utils.upsample import spatial_upsample, fourier_upsample
+from sparse_recon.utils.background_estimation import background_estimation
+from sparse_recon.utils.upsample import spatial_upsample, fourier_upsample
 try:
     import cupy as cp
 except ImportError:
-    cupy = None
+    cp = None
 xp = np if cp is None else cp
 if xp is not cp:
     warnings.warn("could not import cupy... falling back to numpy & cpu.")
@@ -23,13 +22,13 @@ def sparse_deconv(im, sigma, sparse_iter = 100, fidelity = 150, sparsity = 10, t
 
     """Sparse deconvolution.
    	----------
-   	It is an universal post-processing framework for 
-   	fluorescent (or intensity-based) image restoration, 
-   	including xy (2D), xy-t (2D along t axis), 
-   	and xy-z (3D) images. 
-   	It is based on the natural priori 
-   	knowledge of forward fluorescent 
-   	imaging model: sparsity and 
+   	It is an universal post-processing framework for
+   	fluorescent (or intensity-based) image restoration,
+   	including xy (2D), xy-t (2D along t axis),
+   	and xy-z (3D) images.
+   	It is based on the natural priori
+   	knowledge of forward fluorescent
+   	imaging model: sparsity and
    	continuity along xy-t(z) axes.
    	----------
     Parameters
@@ -76,7 +75,7 @@ def sparse_deconv(im, sigma, sparse_iter = 100, fidelity = 150, sparsity = 10, t
     References
     ----------
       [1] Weisong Zhao et al. Sparse deconvolution improves
-      the resolution of live-cell super-resolution 
+      the resolution of live-cell super-resolution
       fluorescence microscopy, Nature Biotechnology (2021),
       https://doi.org/10.1038/s41587-021-01092-2
     """
@@ -118,9 +117,9 @@ def sparse_deconv(im, sigma, sparse_iter = 100, fidelity = 150, sparsity = 10, t
     elif up_sample == 2:
         im = spatial_upsample(im)
     im = im / (im.max())
-    start = time.clock()
+    start = time.time()
     img_sparse = sparse_hessian(im, sparse_iter, fidelity, sparsity, tcontinuity)
-    end = time.clock()
+    end = time.time()
     print('sparse hessian time')
     print(end - start)
     img_sparse = img_sparse / (img_sparse.max())
@@ -128,10 +127,10 @@ def sparse_deconv(im, sigma, sparse_iter = 100, fidelity = 150, sparsity = 10, t
         img_last = img_sparse
         return index * img_last
     else:
-        start = time.clock()
+        start = time.time()
         kernel = Gauss(sigma)
         img_last = iterative_deconv(img_sparse, kernel, deconv_iter, rule = deconv_type)
-        end = time.clock()
+        end = time.time()
         print('deconv time')
         print(end - start)
         return index * img_last

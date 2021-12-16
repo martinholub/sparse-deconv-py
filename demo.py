@@ -2,12 +2,18 @@
 from sparse_recon.sparse_deconv import sparse_deconv
 from skimage import io
 from matplotlib import pyplot as plt
+from sparse_recon.utils.imutils import imcrop, implot, imsave
+import numpy as np
 
 if __name__ == '__main__':
-    im = io.imread('test.tif')
-    plt.imshow(im, cmap = 'gray')
-    plt.show()
+    im = io.imread('test_3d_min.tif')
+    im = imcrop(im)
+    implot(im)
 
-    img_recon = sparse_deconv(im, [5,5])
-    plt.imshow(img_recon / img_recon.max() * 255, cmap = 'gray')
-    plt.show()
+    pixelsize = 199 #(nm)
+    resolution = 600 #(nm)
+
+    #img_recon = sparse_deconv(im, [5,5])
+    img_recon = sparse_deconv(im, [resolution / pixelsize] * 2)
+    implot(img_recon / img_recon.max() * 255)
+    imsave(img_recon)

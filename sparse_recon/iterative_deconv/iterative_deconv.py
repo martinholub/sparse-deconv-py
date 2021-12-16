@@ -6,7 +6,7 @@ from numpy import zeros
 try:
     import cupy as cp
 except ImportError:
-    cupy = None
+    cp = None
 
 xp = np if cp is None else cp
 
@@ -37,7 +37,6 @@ def deblur_core(data, kernel, iteration, rule):
     kernel = kernel / sum(sum(kernel))
     kernel_initial = kernel
     [dx,dy] = data.shape
-
     B = math.floor(min(dx,dy)/6)
     data = xp.pad(data, [int(B),int(B)], 'edge')
     yk = data
@@ -45,7 +44,7 @@ def deblur_core(data, kernel, iteration, rule):
     vk = zeros((data.shape[0], data.shape[1]), dtype = 'float32')
     otf = psf2otf(kernel_initial, data.shape)
 
-    if rule == 2: 
+    if rule == 2:
     #LandWeber deconv
         t = 1
         gamma1 = 1
@@ -116,10 +115,13 @@ def pol2cart(rho, phi):
     return (x, y)
 
 def psf2otf(psf, outSize):
-    psfSize = xp.array(psf.shape)
+    psfSize = xp.array(psf.shape[-len(outSize):])
     outSize = xp.array(outSize)
     padSize = xp.array(outSize - psfSize)
-    psf = xp.pad(psf, ((0, int(padSize[0])), (0, int(padSize[1]))), 'constant')
+    if psf.ndim == 2:
+        psf = xp.pad(psf, ((0, int(padSize[0])), (0, int(padSize[1]))), 'constant')
+    else:
+        psf = xp.pad(psf, ((0, 0), (0, int(padSize[0])), (0, int(padSize[1]))), 'constant')
     for i in range(len(psfSize)):
         psf = xp.roll(psf, -int(psfSize[i] / 2), i)
     otf = xp.fft.fftn(psf)
@@ -135,4 +137,3 @@ def psf2otf(psf, outSize):
 def rliter(yk,data,otf):
     rliter = xp.fft.fftn(data / xp.maximum(xp.fft.ifftn(otf * xp.fft.fftn(yk)), 1e-6))
     return rliter
-

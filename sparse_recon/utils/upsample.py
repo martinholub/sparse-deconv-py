@@ -4,7 +4,7 @@ import numpy as np
 try:
     import cupy as cp
 except ImportError:
-    cupy = None
+    cp = None
 xp =np if cp is None else cp
 if xp is not cp:
     warnings.warn("could not import cupy... falling back to numpy & cpu.")
@@ -33,7 +33,7 @@ def spatial_upsample(SIMmovie,n=2):
 
 
 def fourier_upsample(imgstack, n = 2):
-    ''' 
+    '''
     Fourier interpolation
     -----------------------------------------------
     imgstack: ndarray

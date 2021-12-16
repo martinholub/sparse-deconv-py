@@ -92,5 +92,5 @@ def Gauss(sigma):
                 print(integrate(h, (x, -1, 1)))
     Ipsf=abs(IP**2)
     Ipsf=Ipsf/Ipsf.sum(sum( Ipsf))
-    return Ipsf   
+    return Ipsf
 '''

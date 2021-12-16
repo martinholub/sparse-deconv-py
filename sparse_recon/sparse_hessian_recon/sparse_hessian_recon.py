@@ -1,12 +1,12 @@
 
 import gc
-from operation import *
-from sparse_iteration import *
+from sparse_recon.sparse_hessian_recon.operation import *
+from sparse_recon.sparse_hessian_recon.sparse_iteration import *
 import numpy as np
 try:
     import cupy as cp
 except ImportError:
-    cupy = None
+    cp = None
 xp = np if cp is None else cp
 if xp is not cp:
     warnings.warn("could not import cupy... falling back to numpy & cpu.")
@@ -47,7 +47,7 @@ def sparse_hessian(f, iteration_num = 100, fidelity = 150, sparsity = 10, contiz
         f = xp.array(f)
         for i in range(0,3):
             f[i,:,:] = f1
-        
+
     elif f_flag > 2:
         if f1.shape[0] < 3:
             contiz = 0
@@ -72,7 +72,10 @@ def sparse_hessian(f, iteration_num = 100, fidelity = 150, sparsity = 10, contiz
     normlize = (fidelity/mu) + (sparsity**2) + operationfft
     del xxfft,yyfft,zzfft,xyfft,xzfft,yzfft,operationfft
     gc.collect()
-    xp.clear_memo()
+    try:
+        xp.clear_memo()
+    except AttributeError as e: # MH - probably works just for CuPy
+        pass
     ## initialize b
     bxx = xp.zeros(imgsize,dtype='float32')
     byy = bxx

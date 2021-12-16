@@ -3,7 +3,7 @@ import numpy as np
 try:
     import cupy as cp
 except ImportError:
-    cupy = None
+    cp = None
 xp = np if cp is None else cp
 if xp is not cp:
     warnings.warn("could not import cupy... falling back to numpy & cpu.")
@@ -19,7 +19,7 @@ def forward_diff(data, step, dim):
     assert dim <= 2
     r, n, m = np.shape(data)
     size = np.array((r, n, m))
-    position = xp.zeros(3, dtype = 'float32')
+    position = xp.zeros(3, dtype = 'int')
     temp1 = xp.zeros(size + 1, dtype = 'float32')
     temp2 = xp.zeros(size + 1, dtype = 'float32')
 
@@ -48,7 +48,7 @@ def back_diff(data, step, dim):
     assert dim <= 2
     r, n, m = np.shape(data)
     size = np.array((r, n, m))
-    position = np.zeros(3,dtype='float32')
+    position = np.zeros(3,dtype='int')
     temp1 = xp.zeros(size + 1,dtype='float32')
     temp2 = xp.zeros(size + 1,dtype='float32')
 
@@ -66,7 +66,7 @@ def back_diff(data, step, dim):
 
 def shrink(x, L):
     s = xp.abs(x)
-    xs = xp.sign(x) * xp.maximum(s - 1 / L, 0) 
+    xs = xp.sign(x) * xp.maximum(s - 1 / L, 0)
     return xs
 
 def iter_xx(g, bxx, para, mu):
