@@ -1,12 +1,10 @@
-
 from sparse_recon.sparse_deconv import sparse_deconv
 from skimage import io
 from matplotlib import pyplot as plt
 from sparse_recon.utils.imutils import imcrop, implot, imsave
-import numpy as np
 
 if __name__ == '__main__':
-    im = io.imread('test_3d_min.tif')
+    im = io.imread('test.tif')
     im = imcrop(im)
     implot(im)
 
